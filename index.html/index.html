@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cupón Viral ML — Cupones de Mercado Libre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ml-yellow: #FFE600;
+    --ml-yellow-soft: #FFF176;
+    --ml-blue: #2968F5;
+    --ml-blue-bright: #3B8CFF;
+    --ml-cyan: #29E7F5;
+    --bg-deep: #060A18;
+    --bg-panel: #0D1430;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.10);
+    --text-hi: #F5F7FF;
+    --text-mid: #9CA6C7;
+    --danger: #FF4D6D;
+    --radius: 18px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background: var(--bg-deep);
+    color: var(--text-hi);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    position:relative;
+    min-height:100vh;
+  }
+
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(41,104,245,0.25), transparent 40%),
+      radial-gradient(circle at 85% 0%, rgba(255,230,0,0.10), transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(41,231,245,0.10), transparent 40%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ---------- Lluvia de cupones de fondo ---------- */
+  #coupon-rain{
+    position:fixed; inset:0;
+    overflow:hidden;
+    z-index:1;
+    pointer-events:none;
+  }
+  .drop{
+    position:absolute;
+    top:-60px;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    color: rgba(255,230,0,0.16);
+    white-space:nowrap;
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    user-select:none;
+  }
+  .drop.blue{ color: rgba(59,140,255,0.18); }
+  .drop.cyan{ color: rgba(41,231,245,0.14); }
+  @keyframes fall{
+    0%{ transform: translateY(-10vh) rotate(0deg); opacity:0; }
+    8%{ opacity:1; }
+    92%{ opacity:1; }
+    100%{ transform: translateY(110vh) rotate(25deg); opacity:0; }
+  }
+
+  /* ---------- Layout general ---------- */
+  .wrap{
+    position:relative;
+    z-index:2;
+    max-width:1180px;
+    margin:0 auto;
+    padding: 28px 24px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:8px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:1.15rem;
+    letter-spacing:0.02em;
+  }
+  .brand-dot{
+    width:12px;height:12px;border-radius:50%;
+    background: var(--ml-yellow);
+    box-shadow: 0 0 14px 4px rgba(255,230,0,0.7);
+  }
+  .brand span{ color: var(--ml-yellow); }
+
+  nav.top-badge{
+    font-size:0.78rem;
+    color: var(--text-mid);
+    border:1px solid var(--glass-border);
+    background: var(--glass);
+    padding:8px 14px;
+    border-radius:999px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    display:grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items:center;
+    gap:32px;
+    padding: 48px 0 40px;
+  }
+  .hero-copy .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.75rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color: var(--ml-cyan);
+    background: rgba(41,231,245,0.08);
+    border:1px solid rgba(41,231,245,0.35);
+    padding:6px 12px;
+    border-radius:999px;
+    margin-bottom:18px;
+  }
+  .hero-copy h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+    line-height:1.05;
+    letter-spacing:-0.01em;
+  }
+  .hero-copy h1 em{
+    font-style:normal;
+    color: var(--bg-deep);
+    background: linear-gradient(100deg, var(--ml-yellow), var(--ml-yellow-soft));
+    padding:0 10px;
+    border-radius:8px;
+    box-shadow: 0 0 40px rgba(255,230,0,0.35);
+  }
+  .hero-copy p{
+    margin-top:16px;
+    color: var(--text-mid);
+    font-size:1.02rem;
+    max-width:46ch;
+    line-height:1.55;
+  }
+  .hero-stats{
+    display:flex; gap:26px;
+    margin-top:28px;
+  }
+  .hero-stats div{ text-align:left; }
+  .hero-stats b{
+    display:block;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.5rem;
+    color: var(--ml-yellow);
+  }
+  .hero-stats span{
+    font-size:0.75rem;
+    color: var(--text-mid);
+  }
+
+  .hero-figure{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  .figure-glow{
+    position:absolute;
+    width:340px;height:340px;
+    background: radial-gradient(circle, rgba(255,230,0,0.35), rgba(41,104,245,0.15) 55%, transparent 75%);
+    filter: blur(10px);
+    animation: pulse 4s ease-in-out infinite;
+    border-radius:50%;
+  }
+  @keyframes pulse{
+    0%,100%{ transform:scale(1); opacity:0.85; }
+    50%{ transform:scale(1.08); opacity:1; }
+  }
+  .hero-figure img{
+    position:relative;
+    width:min(360px, 78%);
+    border-radius: 100px;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+    animation: float 5s ease-in-out infinite;
+  }
+  @keyframes float{
+    0%,100%{ transform: translateY(0px); }
+    50%{ transform: translateY(-14px); }
+  }
+  .ring{
+    position:absolute;
+    border-radius:50%;
+    border:1px dashed rgba(59,140,255,0.35);
+    animation: spin 22s linear infinite;
+  }
+  .ring.r1{ width:380px;height:380px; }
+  .ring.r2{ width:440px;height:440px; border-color: rgba(255,230,0,0.20); animation-duration:32s; animation-direction:reverse; }
+  @keyframes spin{ from{ transform:rotate(0deg);} to{ transform:rotate(360deg);} }
+
+  /* ---------- Controles: buscar + categorías ---------- */
+  .controls{
+    position:sticky;
+    top:14px;
+    z-index:5;
+    background: rgba(13,20,48,0.75);
+    border:1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    border-radius: var(--radius);
+    padding:16px;
+    margin-bottom:30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  .search-row{
+    display:flex; gap:10px;
+  }
+  .search-row input{
+    flex:1;
+    background: rgba(255,255,255,0.04);
+    border:1px solid var(--glass-border);
+    color: var(--text-hi);
+    padding:13px 16px;
+    border-radius:12px;
+    font-size:0.95rem;
+    outline:none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search-row input::placeholder{ color: var(--text-mid); }
+  .search-row input:focus{
+    border-color: var(--ml-cyan);
+    box-shadow: 0 0 0 3px rgba(41,231,245,0.15);
+  }
+  .search-row .count{
+    display:flex; align-items:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.8rem;
+    color: var(--text-mid);
+    padding:0 6px;
+    white-space:nowrap;
+  }
+  .cats{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-top:14px;
+  }
+  .cat-btn{
+    font-family:'Inter',sans-serif;
+    font-size:0.82rem;
+    font-weight:600;
+    color: var(--text-mid);
+    background: rgba(255,255,255,0.03);
+    border:1px solid var(--glass-border);
+    padding:8px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    transition: all .18s ease;
+  }
+  .cat-btn:hover{ color: var(--text-hi); border-color: var(--ml-blue-bright); }
+  .cat-btn.active{
+    background: linear-gradient(100deg, var(--ml-yellow), var(--ml-yellow-soft));
+    color: var(--bg-deep);
+    border-color: transparent;
+    box-shadow: 0 0 18px rgba(255,230,0,0.35);
+  }
+
+  /* ---------- Grid de cupones ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap:20px;
+  }
+
+  .coupon{
+    position:relative;
+    border-radius: var(--radius);
+    background: linear-gradient(165deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
+    border:1px solid var(--glass-border);
+    padding:20px;
+    cursor:pointer;
+    overflow:hidden;
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+  }
+  .coupon::before{
+    content:"";
+    position:absolute; inset:0;
+    background: radial-gradient(circle at 85% -10%, rgba(41,104,245,0.30), transparent 55%);
+    opacity:0;
+    transition: opacity .25s ease;
+  }
+  .coupon:hover{
+    transform: translateY(-5px);
+    border-color: rgba(255,230,0,0.55);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,230,0,0.12);
+  }
+  .coupon:hover::before{ opacity:1; }
+
+  .coupon-top{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    position:relative; z-index:1;
+  }
+  .cat-tag{
+    font-size:0.68rem;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color: var(--ml-cyan);
+    background: rgba(41,231,245,0.10);
+    border:1px solid rgba(41,231,245,0.30);
+    padding:4px 9px;
+    border-radius:999px;
+  }
+  .discount{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:1.9rem;
+    color: var(--ml-yellow);
+    line-height:1;
+    text-shadow: 0 0 22px rgba(255,230,0,0.35);
+  }
+
+  .coupon-title{
+    margin-top:14px;
+    font-weight:600;
+    font-size:1.0rem;
+    color: var(--text-hi);
+    position:relative; z-index:1;
+  }
+  .coupon-sub{
+    margin-top:4px;
+    font-size:0.82rem;
+    color: var(--text-mid);
+    position:relative; z-index:1;
+  }
+
+  .code-row{
+    margin-top:16px;
+    display:flex; align-items:center; justify-content:space-between;
+    background: rgba(0,0,0,0.28);
+    border:1px dashed rgba(255,255,255,0.18);
+    border-radius:10px;
+    padding:10px 12px;
+    position:relative; z-index:1;
+  }
+  .code-row .code{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    letter-spacing:0.06em;
+    font-size:0.92rem;
+    color: var(--ml-blue-bright);
+  }
+  .code-row .copy-hint{
+    font-size:0.68rem;
+    color: var(--text-mid);
+    display:flex; align-items:center; gap:5px;
+  }
+
+  .coupon-bottom{
+    margin-top:14px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:relative; z-index:1;
+  }
+  .timer{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    color: var(--danger);
+    display:flex; align-items:center; gap:6px;
+  }
+  .timer .dot{
+    width:6px;height:6px;border-radius:50%;
+    background: var(--danger);
+    box-shadow: 0 0 8px 2px rgba(255,77,109,0.7);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+  .go-btn{
+    font-size:0.78rem;
+    font-weight:700;
+    color: var(--bg-deep);
+    background: linear-gradient(100deg, var(--ml-blue-bright), var(--ml-cyan));
+    padding:8px 14px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+    box-shadow: 0 0 14px rgba(59,140,255,0.35);
+  }
+
+  .empty-state{
+    grid-column: 1 / -1;
+    text-align:center;
+    padding:60px 20px;
+    color: var(--text-mid);
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.9rem;
+  }
+
+  footer{
+    position:relative; z-index:2;
+    text-align:center;
+    padding:36px 20px 10px;
+    color: var(--text-mid);
+    font-size:0.8rem;
+  }
+  footer b{ color: var(--ml-yellow); }
+
+  /* ---------- Toast de copiado ---------- */
+  #toast{
+    position:fixed;
+    bottom:26px; left:50%;
+    transform: translateX(-50%) translateY(20px);
+    background: linear-gradient(100deg, var(--ml-yellow), var(--ml-yellow-soft));
+    color: var(--bg-deep);
+    font-weight:700;
+    font-size:0.88rem;
+    padding:13px 22px;
+    border-radius:12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index:50;
+    opacity:0;
+    pointer-events:none;
+    transition: all .3s ease;
+  }
+  #toast.show{
+    opacity:1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 860px){
+    .hero{ grid-template-columns:1fr; text-align:center; padding-top:20px; }
+    .hero-copy p{ margin-left:auto; margin-right:auto; }
+    .hero-stats{ justify-content:center; }
+    .hero-figure{ order:-1; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="coupon-rain"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand"><span class="brand-dot"></span>Cupón <span>Viral</span> ML</div>
+    <nav class="top-badge">⚡ Ofertas actualizadas hoy</nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">● Cupones verificados</span>
+      <h1>Cupones <em>virales</em><br>de Mercado Libre</h1>
+      <p>Toca un cupón, copiamos el código automáticamente y te llevamos directo a la oferta en Mercado Libre. Sin vueltas, sin buscar.</p>
+      <div class="hero-stats">
+        <div><b id="stat-total">0</b><span>cupones activos</span></div>
+        <div><b>50%</b><span>descuento máx.</span></div>
+        <div><b>24h</b><span>renovación</span></div>
+      </div>
+    </div>
+    <div class="hero-figure">
+      <div class="ring r2"></div>
+      <div class="ring r1"></div>
+      <div class="figure-glow"></div>
+      <img src="mascota.png" alt="Mascota Cupón Viral ML">
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="search-row">
+      <input id="search" type="text" placeholder="Buscar cupón, producto o categoría...">
+      <div class="count"><span id="visible-count">0</span> resultados</div>
+    </div>
+    <div class="cats" id="cats"></div>
+  </section>
+
+  <section class="grid" id="grid"></section>
+
+  <footer>
+    Hecho con <b>♥</b> para cazadores de ofertas — los códigos se copian solos, tú solo compra.<br>
+    Recuerda cambiar el enlace de afiliado en el código antes de publicar.
+  </footer>
+</div>
+
+<div id="toast">Código copiado — abriendo Mercado Libre…</div>
+
+<script>
+/* =======================================================
+   CONFIGURA AQUÍ TU LINK DE AFILIADO DE MERCADO LIBRE
+   Puedes usar el mismo link general para todos los cupones,
+   o poner un "url" distinto dentro de cada cupón de abajo.
+======================================================= */
+const AFFILIATE_LINK = "https://mercadolibre.com/sec/TU-LINK-DE-AFILIADO";
+
+const COUPONS = [
+  { title:"Electrónica en oferta",        sub:"Audio, gadgets y más",     code:"ML50TECH",  discount:"50% OFF", category:"Electrónica", hours:6,  minutes:12 },
+  { title:"Celulares seleccionados",      sub:"Gama media y alta",        code:"ML40CEL",   discount:"40% OFF", category:"Celulares",   hours:3,  minutes:45 },
+  { title:"Hogar y cocina",               sub:"Electrodomésticos top",    code:"ML35HOGAR", discount:"35% OFF", category:"Hogar",       hours:9,  minutes:0  },
+  { title:"Moda de temporada",            sub:"Ropa y calzado",           code:"ML30MODA",  discount:"30% OFF", category:"Moda",        hours:12, minutes:30 },
+  { title:"Deportes y fitness",           sub:"Equipo para entrenar",     code:"ML25DEP",   discount:"25% OFF", category:"Deportes",    hours:5,  minutes:20 },
+  { title:"Belleza y cuidado personal",   sub:"Skincare y maquillaje",    code:"ML20BELL",  discount:"20% OFF", category:"Belleza",     hours:7,  minutes:5  },
+  { title:"Computación",                  sub:"Laptops y periféricos",    code:"ML45PC",    discount:"45% OFF", category:"Electrónica", hours:2,  minutes:50 },
+  { title:"Juguetes y niños",             sub:"Todo para los peques",     code:"ML30KIDS",  discount:"30% OFF", category:"Hogar",       hours:14, minutes:15 },
+  { title:"Herramientas",                 sub:"Para el hogar y taller",   code:"ML28TOOL",  discount:"28% OFF", category:"Hogar",       hours:8,  minutes:40 },
+  { title:"Relojes y accesorios",         sub:"Estilo todos los días",    code:"ML33REL",   discount:"33% OFF", category:"Moda",        hours:4,  minutes:10 },
+  { title:"Gaming",                       sub:"Consolas y videojuegos",   code:"ML50GAME",  discount:"50% OFF", category:"Electrónica", hours:6,  minutes:55 },
+  { title:"Mascotas",                     sub:"Alimento y accesorios",    code:"ML22PET",   discount:"22% OFF", category:"Hogar",       hours:11, minutes:25 },
+];
+
+const grid = document.getElementById("grid");
+const catsWrap = document.getElementById("cats");
+const searchInput = document.getElementById("search");
+const visibleCountEl = document.getElementById("visible-count");
+const statTotal = document.getElementById("stat-total");
+const toast = document.getElementById("toast");
+
+let activeCategory = "Todas";
+
+function buildCategories(){
+  const cats = ["Todas", ...new Set(COUPONS.map(c => c.category))];
+  catsWrap.innerHTML = cats.map(c =>
+    `<button class="cat-btn${c===activeCategory?" active":""}" data-cat="${c}">${c}</button>`
+  ).join("");
+  catsWrap.querySelectorAll(".cat-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      activeCategory = btn.dataset.cat;
+      buildCategories();
+      renderGrid();
+    });
+  });
+}
+
+function timeLeftLabel(totalSeconds){
+  if(totalSeconds <= 0) return "00:00:00";
+  const h = String(Math.floor(totalSeconds/3600)).padStart(2,"0");
+  const m = String(Math.floor((totalSeconds%3600)/60)).padStart(2,"0");
+  const s = String(Math.floor(totalSeconds%60)).padStart(2,"0");
+  return `${h}:${m}:${s}`;
+}
+
+function renderGrid(){
+  const query = searchInput.value.trim().toLowerCase();
+
+  const filtered = COUPONS.filter(c=>{
+    const matchesCat = activeCategory === "Todas" || c.category === activeCategory;
+    const haystack = `${c.title} ${c.sub} ${c.category} ${c.code}`.toLowerCase();
+    const matchesQuery = haystack.includes(query);
+    return matchesCat && matchesQuery;
+  });
+
+  visibleCountEl.textContent = filtered.length;
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="empty-state">No encontramos cupones para tu búsqueda. Probá con otra categoría o palabra clave.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((c, i)=>{
+    const secondsLeft = (c.hours*3600 + c.minutes*60);
+    return `
+      <div class="coupon" data-index="${COUPONS.indexOf(c)}" data-seconds="${secondsLeft}">
+        <div class="coupon-top">
+          <span class="cat-tag">${c.category}</span>
+          <span class="discount">${c.discount}</span>
+        </div>
+        <div class="coupon-title">${c.title}</div>
+        <div class="coupon-sub">${c.sub}</div>
+        <div class="code-row">
+          <span class="code">${c.code}</span>
+          <span class="copy-hint">⧉ Copiar</span>
+        </div>
+        <div class="coupon-bottom">
+          <span class="timer"><span class="dot"></span><span class="timer-text">${timeLeftLabel(secondsLeft)}</span></span>
+          <button class="go-btn">Usar cupón →</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  grid.querySelectorAll(".coupon").forEach(card=>{
+    card.addEventListener("click", ()=> activateCoupon(card));
+  });
+
+  startTimers();
+}
+
+let timerHandle = null;
+function startTimers(){
+  if(timerHandle) clearInterval(timerHandle);
+  timerHandle = setInterval(()=>{
+    document.querySelectorAll(".coupon").forEach(card=>{
+      let secs = parseInt(card.dataset.seconds, 10) - 1;
+      if(secs <= 0) secs = 12*3600; // el cupón se "renueva" al llegar a 0
+      card.dataset.seconds = secs;
+      const label = card.querySelector(".timer-text");
+      if(label) label.textContent = timeLeftLabel(secs);
+    });
+  }, 1000);
+}
+
+function activateCoupon(card){
+  const idx = card.dataset.index;
+  const coupon = COUPONS[idx];
+  const link = coupon.url || AFFILIATE_LINK;
+
+  const finish = () => {
+    showToast(`Código ${coupon.code} copiado — abriendo Mercado Libre…`);
+    window.open(link, "_blank", "noopener");
+  };
+
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(coupon.code).then(finish).catch(finish);
+  } else {
+    finish();
+  }
+}
+
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> toast.classList.remove("show"), 2600);
+}
+
+searchInput.addEventListener("input", renderGrid);
+
+/* ---------- Lluvia de cupones de fondo ---------- */
+function buildRain(){
+  const rain = document.getElementById("coupon-rain");
+  const symbols = ["% OFF","CUPÓN","ML","AHORRA","$","50%","30%","OFERTA"];
+  const colorClasses = ["", "blue", "cyan"];
+  const total = window.innerWidth < 700 ? 22 : 40;
+
+  for(let i=0; i<total; i++){
+    const el = document.createElement("span");
+    const size = 12 + Math.random()*16;
+    const duration = 8 + Math.random()*10;
+    const delay = Math.random()*10;
+    el.className = "drop " + colorClasses[Math.floor(Math.random()*colorClasses.length)];
+    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    el.style.left = Math.random()*100 + "vw";
+    el.style.fontSize = size + "px";
+    el.style.animationDuration = duration + "s";
+    el.style.animationDelay = "-" + delay + "s";
+    rain.appendChild(el);
+  }
+}
+
+/* ---------- Init ---------- */
+statTotal.textContent = COUPONS.length;
+buildCategories();
+renderGrid();
+buildRain();
+</script>
+</body>
+</html>
